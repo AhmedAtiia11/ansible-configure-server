@@ -26,7 +26,8 @@ pipeline {
                 script {
                     // Run the Ansible playbook
                     sh """
-                        ansible-playbook -i ${ANSIBLE_INVENTORY} ${ANSIBLE_PLAYBOOK}
+                        sh "ansible-playbook -i ${ANSIBLE_INVENTORY} ${ANSIBLE_PLAYBOOK} --become --become-user=root"
+
                     """
                 }
             }
