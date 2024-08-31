@@ -2,7 +2,7 @@ pipeline {
     agent any
     environment {
         // Define the Ansible playbook path and inventory
-        ANSIBLE_PLAYBOOK = 'play.yml'
+        ANSIBLE_PLAYBOOK = 'play.yaml'
         ANSIBLE_INVENTORY = 'inventory'
     }
     stages {
