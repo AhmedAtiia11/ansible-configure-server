@@ -1,0 +1,106 @@
+---
+- name: Install Docker, Java 11 JDK, Maven, and Git on Ubuntu
+  hosts: localhost
+  become: yes
+
+  tasks:
+
+    - name: Install prerequisite packages
+      apt:
+        name:
+          - apt-transport-https
+          - ca-certificates
+          - curl
+          - software-properties-common
+        state: present
+
+    - name: Add Docker's official GPG key
+      apt_key:
+        url: https://download.docker.com/linux/ubuntu/gpg
+        state: present
+
+    - name: Add Docker's official APT repository
+      apt_repository:
+        repo: "deb [arch=amd64] https://download.docker.com/linux/ubuntu {{ ansible_lsb.codename }} stable"
+        state: present
+        filename: docker
+
+
+    - name: Install Docker
+      apt:
+        name:
+          - docker-ce
+          - docker-ce-cli
+          - containerd.io
+        state: present
+
+    - name: Start Docker service
+      systemd:
+        name: docker
+        state: started
+        enabled: yes
+
+    - name: Install Java 11 JDK
+      apt:
+        name: openjdk-11-jdk
+        state: present
+
+    - name: Install Git
+      apt:
+        name: git
+        state: present
+
+    - name: Download Maven 3.9.6 from a reliable mirror
+      get_url:
+        url: https://archive.apache.org/dist/maven/maven-3/3.9.6/binaries/apache-maven-3.9.6-bin.tar.gz
+        dest: /tmp/apache-maven-3.9.6-bin.tar.gz
+
+    - name: Extract Maven
+      unarchive:
+        src: /tmp/apache-maven-3.9.6-bin.tar.gz
+        dest: /opt
+        remote_src: yes
+
+    - name: Set Maven environment variables
+      lineinfile:
+        path: /etc/profile.d/maven.sh
+        line: |
+          export M2_HOME=/opt/apache-maven-3.9.6
+          export PATH=$M2_HOME/bin:$PATH
+        create: yes
+        state: present
+
+
+    - name: Verify Docker installation
+      shell: docker --version
+      register: docker_version
+
+    - name: Show Docker version
+      debug:
+        msg: "Docker version installed: {{ docker_version.stdout }}"
+
+    - name: Verify Java installation
+      shell: java -version
+      register: java_version
+      ignore_errors: yes
+
+    - name: Show Java version
+      debug:
+        msg: "Java version installed: {{ java_version.stderr }}"
+
+    - name: Verify Maven installation
+      shell: mvn -version
+      register: maven_version
+
+    - name: Show Maven version
+      debug:
+        msg: "Maven version installed: {{ maven_version.stdout }}"
+
+    - name: Verify Git installation
+      shell: git --version
+      register: git_version
+
+    - name: Show Git version
+      debug:
+        msg: "Git version installed: {{ git_version.stdout }}"
+
