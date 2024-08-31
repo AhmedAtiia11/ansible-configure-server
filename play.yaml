@@ -1,6 +1,6 @@
 ---
 - name: Install Docker, Java 11 JDK, Maven, and Git on Ubuntu
-  hosts: localhost
+  hosts: myserver
   become: yes
 
   tasks:
