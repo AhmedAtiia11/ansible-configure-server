@@ -55,7 +55,7 @@ pipeline {
                     sh """
                     docker run -d --name ${CONTAINER_NAME} \
                     -p ${HOST_PORT}:8080 \
-                    -v ./sample.war:/usr/local/tomcat/webapps/ \
+                    -v ./sample.war:/usr/local/tomcat/webapps/sample.war \
                     tomcat
                     """
                 }
