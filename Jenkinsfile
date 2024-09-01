@@ -1,9 +1,11 @@
 pipeline {
     agent any
     environment {
-        // Define the Ansible playbook path and inventory
+        // Define the Ansible playbook path , inventory , Container name and Host port
         ANSIBLE_PLAYBOOK = 'play.yaml'
         ANSIBLE_INVENTORY = 'inventory'
+        CONTAINER_NAME = 'tomcat_container'
+        HOST_PORT = '8082'
     }
     stages {
         stage('Setup Ansible') {
@@ -31,6 +33,35 @@ pipeline {
                 }
             }
         }
+        stage('Check and Remove Existing Container') {
+            steps {
+                script {
+                    // Check if the container is running
+                    def containerRunning = sh(script: "docker ps --filter 'name=${CONTAINER_NAME}' --format '{{.Names}}'", returnStdout: true).trim()
+
+                    if (containerRunning) {
+                        // Stop and remove the running container
+                        sh "docker stop ${CONTAINER_NAME}"
+                        sh "docker rm ${CONTAINER_NAME}"
+                    }
+                }
+            }
+        }
+
+        stage('Run Docker Container') {
+            steps {
+                script {
+                    // Run a new container
+                    sh """
+                    docker run -d --name ${CONTAINER_NAME} \
+                    -p ${HOST_PORT}:8080 \
+                    -v ./sample.war:/usr/local/tomcat/webapps/ \
+                    tomcat
+                    """
+                }
+            }
+        }
+    }
     }
 
     post {
@@ -38,4 +69,4 @@ pipeline {
             echo 'Pipeline completed.'
         }
     }
-}
+
